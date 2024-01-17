@@ -1,23 +1,33 @@
 <html>
 
 <head>
+    <title>Bryte Church - Room Schedule</title>
     <script src="https://code.jquery.com/jquery-3.6.3.min.js"
         integrity3="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
         integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
         integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-    <link href='https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/ui-lightness/jquery-ui.css'
-        rel='stylesheet'>
+    <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/ui-lightness/jquery-ui.css"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
 
     <script>
-        var cid = "86859546a79e2327dcdea940294e897b471f7a1febbdbced133b53fbe762e4b7"
-        var secret = "ea32b02c65e4fb51415063b77168f1c611137b77b5f445f6d85ac2a00834e893"
-        var rooms = ajax("https://api.planningcenteronline.com/calendar/v2/resources?filter=rooms&order=name");
-
+        var rooms;
+        var t_n;
+        var return_code;
 
         $(function () {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            return_code = urlParams.get('code');
+
+            if (!t_n && !return_code)
+                window.location = "https://api.planningcenteronline.com/oauth/authorize?client_id=4d16b452f211191a3a92d5f8579caef561dfd759148f1f096921c845ec97337d&redirect_uri=https://rusyus2000.github.io&response_type=code&scope=calendar";
+            if (!t_n)
+                app_authenticate();
+
+
             var date = new Date().toLocaleDateString('en-CA');
 
             $("#datepicker").datepicker({
@@ -28,10 +38,6 @@
                 })
 
             $("#datepicker").datepicker("setDate", new Date());
-
-            var token = ('')
-
-
 
             var daySchedule = ajax("https://api.planningcenteronline.com/calendar/v2/resource_bookings?where[starts_at]=" + date + "&where[ends_at]=" + date)
             //var multidayEvents = ajax("https://api.planningcenteronline.com/calendar/v2/resource_bookings?where[ends_at][gte]="+date+"&where[starts_at][lte]="+date)
@@ -47,6 +53,7 @@
         }
 
         function ajax(url) {
+            console.log("ajax call: " + url);
             var returnVal;
             $.ajax
                 ({
@@ -54,37 +61,44 @@
                     url: url,
                     dataType: 'json',
                     async: false,
-                    data: '{ "comment" }',
                     beforeSend: function (xhr) {
-                        xhr.setRequestHeader("Authorization", "Basic " + btoa(cid + ":" + secret));
+                        xhr.setRequestHeader("Authorization", "Bearer " + t_n);
                     },
                     success: function (data) {
                         returnVal = data;
                     },
                     error: function (response) {
-                        alert(response);
+                        console.log("ajax error: " + response.statusText);
                     }
                 });
             return returnVal;
         }
 
-        function authenticate() {
+        function app_authenticate() {
+            var _url = "https://api.planningcenteronline.com/oauth/token?grant_type=authorization_code&code=" + return_code + "&client_id=4d16b452f211191a3a92d5f8579caef561dfd759148f1f096921c845ec97337d&client_secret=ea32b02c65e4fb51415063b77168f1c611137b77b5f445f6d85ac2a00834e893&redirect_uri=https://rusyus2000.github.io";
             $.ajax
                 ({
                     type: "POST",
-                    url: "https://api.planningcenteronline.com/oauth/authorize?client_id=4d16b452f211191a3a92d5f8579caef561dfd759148f1f096921c845ec97337d&redirect_uri=https://tripleagent93.github.io/&response_type=code&scope=calendar",
-                    async: true,
+                    url: _url,
+                    async: false,
                     success: function (data) {
-                        returnVal = data;
+                        //console.log("token: "+data.access_token);
+                        t_n = data.access_token;
                     },
                     error: function (response) {
-                        alert(response);
+                        console.log("app_authenticate error: " + response.statusText);
                     }
                 });
-            return returnVal;
         }
 
+
         function generateCalendar(roomsObj, scheduleObj) {
+            if (!roomsObj) {
+                rooms = ajax("https://api.planningcenteronline.com/calendar/v2/resources?filter=rooms&order=name");
+                roomsObj = rooms;
+            }
+
+
             $("#divMain").empty();
 
             jQuery('<table >', {
@@ -187,7 +201,7 @@
 
         <div class="text-center"><img
                 src="https://www.brytechurch.org/wp-content/uploads/2018/11/cropped-LOGO-cropped.png"
-                class="text-center" style="max-width:50%" /></div>
+                class="text-center" style="max-width:50%"></div>
         <h3 class="text-center p-3">Room Availability</h3>
         <div class="card border-info">
             <div class="card-header text-center pt-3 pb-3" style="font-size:1.5em;font-style:bold">
@@ -195,7 +209,7 @@
                 <a href="#" onclick="SetDate(-1);return false;"
                     style="text-decoration:none;position:relative;top:3px">&nbsp;<i
                         class="fa-solid fa-chevron-left"></i>&nbsp;</a>
-                <input class="form-control w-25" style="display:inline-block" type="text" id="datepicker" />
+                <input class="form-control w-25 hasDatepicker" style="display:inline-block" type="text" id="datepicker">
                 <a href="#" onclick="SetDate(1);return false;"
                     style="text-decoration:none;position:relative;top:3px">&nbsp;<i
                         class="fa-solid fa-chevron-right"></i></a>
@@ -203,12 +217,630 @@
             <div class="card-body">
 
                 <div id="divMain" class="text-center">
+                    <table id="tblCalendar" style="margin:auto">
+                        <tr>
+                            <td></td>
+                            <td class="fw-bold">&nbsp;7am&nbsp;</td>
+                            <td class="fw-bold">&nbsp;8am&nbsp;</td>
+                            <td class="fw-bold">&nbsp;9am&nbsp;</td>
+                            <td class="fw-bold">&nbsp;10am&nbsp;</td>
+                            <td class="fw-bold">&nbsp;11am&nbsp;</td>
+                            <td class="fw-bold">&nbsp;12pm&nbsp;</td>
+                            <td class="fw-bold">&nbsp;1pm&nbsp;</td>
+                            <td class="fw-bold">&nbsp;2pm&nbsp;</td>
+                            <td class="fw-bold">&nbsp;3pm&nbsp;</td>
+                            <td class="fw-bold">&nbsp;4pm&nbsp;</td>
+                            <td class="fw-bold">&nbsp;5pm&nbsp;</td>
+                            <td class="fw-bold">&nbsp;6pm&nbsp;</td>
+                            <td class="fw-bold">&nbsp;7pm&nbsp;</td>
+                            <td class="fw-bold">&nbsp;8pm&nbsp;</td>
+                            <td class="fw-bold">&nbsp;9pm&nbsp;</td>
+                            <td class="fw-bold">&nbsp;10pm&nbsp;</td>
+                        </tr>
+                        <tr id="tr464260" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold"> 112 - Kids Room</td>
+                            <td style="border:1px solid #ccc" id="7-464260"></td>
+                            <td style="border:1px solid #ccc" id="8-464260"></td>
+                            <td style="border:1px solid #ccc" id="9-464260"></td>
+                            <td style="border:1px solid #ccc" id="10-464260"></td>
+                            <td style="border:1px solid #ccc" id="11-464260"></td>
+                            <td style="border:1px solid #ccc" id="12-464260"></td>
+                            <td style="border:1px solid #ccc" id="13-464260"></td>
+                            <td style="border:1px solid #ccc" id="14-464260"></td>
+                            <td style="border:1px solid #ccc" id="15-464260"></td>
+                            <td style="border:1px solid #ccc" id="16-464260"></td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="17-464260">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="18-464260">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="19-464260">
+                            </td>
+                            <td style="border:1px solid #ccc" id="20-464260"></td>
+                            <td style="border:1px solid #ccc" id="21-464260"></td>
+                            <td style="border:1px solid #ccc" id="22-464260"></td>
+                        </tr>
+                        <tr id="tr463498" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">103 - Meeting Room</td>
+                            <td style="border:1px solid #ccc" id="7-463498"></td>
+                            <td style="border:1px solid #ccc" id="8-463498"></td>
+                            <td style="border:1px solid #ccc" id="9-463498"></td>
+                            <td style="border:1px solid #ccc" id="10-463498"></td>
+                            <td style="border:1px solid #ccc" id="11-463498"></td>
+                            <td style="border:1px solid #ccc" id="12-463498"></td>
+                            <td style="border:1px solid #ccc" id="13-463498"></td>
+                            <td style="border:1px solid #ccc" id="14-463498"></td>
+                            <td style="border:1px solid #ccc" id="15-463498"></td>
+                            <td style="border:1px solid #ccc" id="16-463498"></td>
+                            <td style="border:1px solid #ccc" id="17-463498"></td>
+                            <td style="border:1px solid #ccc" id="18-463498"></td>
+                            <td style="border:1px solid #ccc" id="19-463498"></td>
+                            <td style="border:1px solid #ccc" id="20-463498"></td>
+                            <td style="border:1px solid #ccc" id="21-463498"></td>
+                            <td style="border:1px solid #ccc" id="22-463498"></td>
+                        </tr>
+                        <tr id="tr464322" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">113 - Kids Room</td>
+                            <td style="border:1px solid #ccc" id="7-464322"></td>
+                            <td style="border:1px solid #ccc" id="8-464322"></td>
+                            <td style="border:1px solid #ccc" id="9-464322"></td>
+                            <td style="border:1px solid #ccc" id="10-464322"></td>
+                            <td style="border:1px solid #ccc" id="11-464322"></td>
+                            <td style="border:1px solid #ccc" id="12-464322"></td>
+                            <td style="border:1px solid #ccc" id="13-464322"></td>
+                            <td style="border:1px solid #ccc" id="14-464322"></td>
+                            <td style="border:1px solid #ccc" id="15-464322"></td>
+                            <td style="border:1px solid #ccc" id="16-464322"></td>
+                            <td style="border:1px solid #ccc" id="17-464322"></td>
+                            <td style="border:1px solid #ccc" id="18-464322"></td>
+                            <td style="border:1px solid #ccc" id="19-464322"></td>
+                            <td style="border:1px solid #ccc" id="20-464322"></td>
+                            <td style="border:1px solid #ccc" id="21-464322"></td>
+                            <td style="border:1px solid #ccc" id="22-464322"></td>
+                        </tr>
+                        <tr id="tr464323" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">115 - Kids Room </td>
+                            <td style="border:1px solid #ccc" id="7-464323"></td>
+                            <td style="border:1px solid #ccc" id="8-464323"></td>
+                            <td style="border:1px solid #ccc" id="9-464323"></td>
+                            <td style="border:1px solid #ccc" id="10-464323"></td>
+                            <td style="border:1px solid #ccc" id="11-464323"></td>
+                            <td style="border:1px solid #ccc" id="12-464323"></td>
+                            <td style="border:1px solid #ccc" id="13-464323"></td>
+                            <td style="border:1px solid #ccc" id="14-464323"></td>
+                            <td style="border:1px solid #ccc" id="15-464323"></td>
+                            <td style="border:1px solid #ccc" id="16-464323"></td>
+                            <td style="border:1px solid #ccc" id="17-464323"></td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="18-464323">
+                            </td>
+                            <td style="border:1px solid #ccc" id="19-464323"></td>
+                            <td style="border:1px solid #ccc" id="20-464323"></td>
+                            <td style="border:1px solid #ccc" id="21-464323"></td>
+                            <td style="border:1px solid #ccc" id="22-464323"></td>
+                        </tr>
+                        <tr id="trSeparator464259" style="background-color:#ddd">
+                            <td colspan="17" style="border:1px solid #ccc"></td>
+                        </tr>
+                        <tr id="tr464259" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">201/203 - Classroom</td>
+                            <td style="border:1px solid #ccc" id="7-464259"></td>
+                            <td style="border:1px solid #ccc" id="8-464259"></td>
+                            <td style="border:1px solid #ccc" id="9-464259"></td>
+                            <td style="border:1px solid #ccc" id="10-464259"></td>
+                            <td style="border:1px solid #ccc" id="11-464259"></td>
+                            <td style="border:1px solid #ccc" id="12-464259"></td>
+                            <td style="border:1px solid #ccc" id="13-464259"></td>
+                            <td style="border:1px solid #ccc" id="14-464259"></td>
+                            <td style="border:1px solid #ccc" id="15-464259"></td>
+                            <td style="border:1px solid #ccc" id="16-464259"></td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="17-464259">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="18-464259">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="19-464259">
+                            </td>
+                            <td style="border:1px solid #ccc" id="20-464259"></td>
+                            <td style="border:1px solid #ccc" id="21-464259"></td>
+                            <td style="border:1px solid #ccc" id="22-464259"></td>
+                        </tr>
+                        <tr id="tr464331" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">202 Youth Room</td>
+                            <td style="border:1px solid #ccc" id="7-464331"></td>
+                            <td style="border:1px solid #ccc" id="8-464331"></td>
+                            <td style="border:1px solid #ccc" id="9-464331"></td>
+                            <td style="border:1px solid #ccc" id="10-464331"></td>
+                            <td style="border:1px solid #ccc" id="11-464331"></td>
+                            <td style="border:1px solid #ccc" id="12-464331"></td>
+                            <td style="border:1px solid #ccc" id="13-464331"></td>
+                            <td style="border:1px solid #ccc" id="14-464331"></td>
+                            <td style="border:1px solid #ccc" id="15-464331"></td>
+                            <td style="border:1px solid #ccc" id="16-464331"></td>
+                            <td style="border:1px solid #ccc" id="17-464331"></td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="18-464331">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="19-464331">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="20-464331">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="21-464331">
+                            </td>
+                            <td style="border:1px solid #ccc" id="22-464331"></td>
+                        </tr>
+                        <tr id="tr464328" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">204 - Classroom</td>
+                            <td style="border:1px solid #ccc" id="7-464328"></td>
+                            <td style="border:1px solid #ccc" id="8-464328"></td>
+                            <td style="border:1px solid #ccc" id="9-464328"></td>
+                            <td style="border:1px solid #ccc" id="10-464328"></td>
+                            <td style="border:1px solid #ccc" id="11-464328"></td>
+                            <td style="border:1px solid #ccc" id="12-464328"></td>
+                            <td style="border:1px solid #ccc" id="13-464328"></td>
+                            <td style="border:1px solid #ccc" id="14-464328"></td>
+                            <td style="border:1px solid #ccc" id="15-464328"></td>
+                            <td style="border:1px solid #ccc" id="16-464328"></td>
+                            <td style="border:1px solid #ccc" id="17-464328"></td>
+                            <td style="border:1px solid #ccc" id="18-464328"></td>
+                            <td style="border:1px solid #ccc" id="19-464328"></td>
+                            <td style="border:1px solid #ccc" id="20-464328"></td>
+                            <td style="border:1px solid #ccc" id="21-464328"></td>
+                            <td style="border:1px solid #ccc" id="22-464328"></td>
+                        </tr>
+                        <tr id="tr464324" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">205/207 - Classroom</td>
+                            <td style="border:1px solid #ccc" id="7-464324"></td>
+                            <td style="border:1px solid #ccc" id="8-464324"></td>
+                            <td style="border:1px solid #ccc" id="9-464324"></td>
+                            <td style="border:1px solid #ccc" id="10-464324"></td>
+                            <td style="border:1px solid #ccc" id="11-464324"></td>
+                            <td style="border:1px solid #ccc" id="12-464324"></td>
+                            <td style="border:1px solid #ccc" id="13-464324"></td>
+                            <td style="border:1px solid #ccc" id="14-464324"></td>
+                            <td style="border:1px solid #ccc" id="15-464324"></td>
+                            <td style="border:1px solid #ccc" id="16-464324"></td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="17-464324">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="18-464324">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="19-464324">
+                            </td>
+                            <td style="border:1px solid #ccc" id="20-464324"></td>
+                            <td style="border:1px solid #ccc" id="21-464324"></td>
+                            <td style="border:1px solid #ccc" id="22-464324"></td>
+                        </tr>
+                        <tr id="tr464329" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">208 - Classroom</td>
+                            <td style="border:1px solid #ccc" id="7-464329"></td>
+                            <td style="border:1px solid #ccc" id="8-464329"></td>
+                            <td style="border:1px solid #ccc" id="9-464329"></td>
+                            <td style="border:1px solid #ccc" id="10-464329"></td>
+                            <td style="border:1px solid #ccc" id="11-464329"></td>
+                            <td style="border:1px solid #ccc" id="12-464329"></td>
+                            <td style="border:1px solid #ccc" id="13-464329"></td>
+                            <td style="border:1px solid #ccc" id="14-464329"></td>
+                            <td style="border:1px solid #ccc" id="15-464329"></td>
+                            <td style="border:1px solid #ccc" id="16-464329"></td>
+                            <td style="border:1px solid #ccc" id="17-464329"></td>
+                            <td style="border:1px solid #ccc" id="18-464329"></td>
+                            <td style="border:1px solid #ccc" id="19-464329"></td>
+                            <td style="border:1px solid #ccc" id="20-464329"></td>
+                            <td style="border:1px solid #ccc" id="21-464329"></td>
+                            <td style="border:1px solid #ccc" id="22-464329"></td>
+                        </tr>
+                        <tr id="tr464330" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">210 - Classroom</td>
+                            <td style="border:1px solid #ccc" id="7-464330"></td>
+                            <td style="border:1px solid #ccc" id="8-464330"></td>
+                            <td style="border:1px solid #ccc" id="9-464330"></td>
+                            <td style="border:1px solid #ccc" id="10-464330"></td>
+                            <td style="border:1px solid #ccc" id="11-464330"></td>
+                            <td style="border:1px solid #ccc" id="12-464330"></td>
+                            <td style="border:1px solid #ccc" id="13-464330"></td>
+                            <td style="border:1px solid #ccc" id="14-464330"></td>
+                            <td style="border:1px solid #ccc" id="15-464330"></td>
+                            <td style="border:1px solid #ccc" id="16-464330"></td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="17-464330">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="18-464330">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="19-464330">
+                            </td>
+                            <td style="border:1px solid #ccc" id="20-464330"></td>
+                            <td style="border:1px solid #ccc" id="21-464330"></td>
+                            <td style="border:1px solid #ccc" id="22-464330"></td>
+                        </tr>
+                        <tr id="tr464327" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">211 - Classroom</td>
+                            <td style="border:1px solid #ccc" id="7-464327"></td>
+                            <td style="border:1px solid #ccc" id="8-464327"></td>
+                            <td style="border:1px solid #ccc" id="9-464327"></td>
+                            <td style="border:1px solid #ccc" id="10-464327"></td>
+                            <td style="border:1px solid #ccc" id="11-464327"></td>
+                            <td style="border:1px solid #ccc" id="12-464327"></td>
+                            <td style="border:1px solid #ccc" id="13-464327"></td>
+                            <td style="border:1px solid #ccc" id="14-464327"></td>
+                            <td style="border:1px solid #ccc" id="15-464327"></td>
+                            <td style="border:1px solid #ccc" id="16-464327"></td>
+                            <td style="border:1px solid #ccc" id="17-464327"></td>
+                            <td style="border:1px solid #ccc" id="18-464327"></td>
+                            <td style="border:1px solid #ccc" id="19-464327"></td>
+                            <td style="border:1px solid #ccc" id="20-464327"></td>
+                            <td style="border:1px solid #ccc" id="21-464327"></td>
+                            <td style="border:1px solid #ccc" id="22-464327"></td>
+                        </tr>
+                        <tr id="tr464326" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">213/215 - Classroom</td>
+                            <td style="border:1px solid #ccc" id="7-464326"></td>
+                            <td style="border:1px solid #ccc" id="8-464326"></td>
+                            <td style="border:1px solid #ccc" id="9-464326"></td>
+                            <td style="border:1px solid #ccc" id="10-464326"></td>
+                            <td style="border:1px solid #ccc" id="11-464326"></td>
+                            <td style="border:1px solid #ccc" id="12-464326"></td>
+                            <td style="border:1px solid #ccc" id="13-464326"></td>
+                            <td style="border:1px solid #ccc" id="14-464326"></td>
+                            <td style="border:1px solid #ccc" id="15-464326"></td>
+                            <td style="border:1px solid #ccc" id="16-464326"></td>
+                            <td style="border:1px solid #ccc" id="17-464326"></td>
+                            <td style="border:1px solid #ccc" id="18-464326"></td>
+                            <td style="border:1px solid #ccc" id="19-464326"></td>
+                            <td style="border:1px solid #ccc" id="20-464326"></td>
+                            <td style="border:1px solid #ccc" id="21-464326"></td>
+                            <td style="border:1px solid #ccc" id="22-464326"></td>
+                        </tr>
+                        <tr id="trSeparator464821" style="background-color:#ddd">
+                            <td colspan="17" style="border:1px solid #ccc"></td>
+                        </tr>
+                        <tr id="tr464821" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">Brother's Room</td>
+                            <td style="border:1px solid #ccc" id="7-464821"></td>
+                            <td style="border:1px solid #ccc" id="8-464821"></td>
+                            <td style="border:1px solid #ccc" id="9-464821"></td>
+                            <td style="border:1px solid #ccc" id="10-464821"></td>
+                            <td style="border:1px solid #ccc" id="11-464821"></td>
+                            <td style="border:1px solid #ccc" id="12-464821"></td>
+                            <td style="border:1px solid #ccc" id="13-464821"></td>
+                            <td style="border:1px solid #ccc" id="14-464821"></td>
+                            <td style="border:1px solid #ccc" id="15-464821"></td>
+                            <td style="border:1px solid #ccc" id="16-464821"></td>
+                            <td style="border:1px solid #ccc" id="17-464821"></td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="18-464821">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="19-464821">
+                            </td>
+                            <td style="border:1px solid #ccc" id="20-464821"></td>
+                            <td style="border:1px solid #ccc" id="21-464821"></td>
+                            <td style="border:1px solid #ccc" id="22-464821"></td>
+                        </tr>
+                        <tr id="tr622287" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')"
+                            style="background-color: rgb(255, 255, 255);">
+                            <td class="fw-bold">Choir Room</td>
+                            <td style="border:1px solid #ccc" id="7-622287"></td>
+                            <td style="border:1px solid #ccc" id="8-622287"></td>
+                            <td style="border:1px solid #ccc" id="9-622287"></td>
+                            <td style="border:1px solid #ccc" id="10-622287"></td>
+                            <td style="border:1px solid #ccc" id="11-622287"></td>
+                            <td style="border:1px solid #ccc" id="12-622287"></td>
+                            <td style="border:1px solid #ccc" id="13-622287"></td>
+                            <td style="border:1px solid #ccc" id="14-622287"></td>
+                            <td style="border:1px solid #ccc" id="15-622287"></td>
+                            <td style="border:1px solid #ccc" id="16-622287"></td>
+                            <td style="border:1px solid #ccc" id="17-622287"></td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="18-622287">
+                            </td>
+                            <td style="border:1px solid #ccc" id="19-622287"></td>
+                            <td style="border:1px solid #ccc" id="20-622287"></td>
+                            <td style="border:1px solid #ccc" id="21-622287"></td>
+                            <td style="border:1px solid #ccc" id="22-622287"></td>
+                        </tr>
+                        <tr id="tr463975" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">Gym</td>
+                            <td style="border:1px solid #ccc" id="7-463975"></td>
+                            <td style="border:1px solid #ccc" id="8-463975"></td>
+                            <td style="border:1px solid #ccc" id="9-463975"></td>
+                            <td style="border:1px solid #ccc" id="10-463975"></td>
+                            <td style="border:1px solid #ccc" id="11-463975"></td>
+                            <td style="border:1px solid #ccc" id="12-463975"></td>
+                            <td style="border:1px solid #ccc" id="13-463975"></td>
+                            <td style="border:1px solid #ccc" id="14-463975"></td>
+                            <td style="border:1px solid #ccc" id="15-463975"></td>
+                            <td style="border:1px solid #ccc" id="16-463975"></td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="17-463975">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="18-463975">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="19-463975">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="20-463975">
+                            </td>
+                            <td style="border:1px solid #ccc" id="21-463975"></td>
+                            <td style="border:1px solid #ccc" id="22-463975"></td>
+                        </tr>
+                        <tr id="tr463974" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">Kitchen</td>
+                            <td style="border:1px solid #ccc" id="7-463974"></td>
+                            <td style="border:1px solid #ccc" id="8-463974"></td>
+                            <td style="border:1px solid #ccc" id="9-463974"></td>
+                            <td style="border:1px solid #ccc" id="10-463974"></td>
+                            <td style="border:1px solid #ccc" id="11-463974"></td>
+                            <td style="border:1px solid #ccc" id="12-463974"></td>
+                            <td style="border:1px solid #ccc" id="13-463974"></td>
+                            <td style="border:1px solid #ccc" id="14-463974"></td>
+                            <td style="border:1px solid #ccc" id="15-463974"></td>
+                            <td style="border:1px solid #ccc" id="16-463974"></td>
+                            <td style="border:1px solid #ccc" id="17-463974"></td>
+                            <td style="border:1px solid #ccc" id="18-463974"></td>
+                            <td style="border:1px solid #ccc" id="19-463974"></td>
+                            <td style="border:1px solid #ccc" id="20-463974"></td>
+                            <td style="border:1px solid #ccc" id="21-463974"></td>
+                            <td style="border:1px solid #ccc" id="22-463974"></td>
+                        </tr>
+                        <tr id="tr463976" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">Sanctuary</td>
+                            <td style="border:1px solid #ccc" id="7-463976"></td>
+                            <td style="border:1px solid #ccc" id="8-463976"></td>
+                            <td style="border:1px solid #ccc" id="9-463976"></td>
+                            <td style="border:1px solid #ccc" id="10-463976"></td>
+                            <td style="border:1px solid #ccc" id="11-463976"></td>
+                            <td style="border:1px solid #ccc" id="12-463976"></td>
+                            <td style="border:1px solid #ccc" id="13-463976"></td>
+                            <td style="border:1px solid #ccc" id="14-463976"></td>
+                            <td style="border:1px solid #ccc" id="15-463976"></td>
+                            <td style="border:1px solid #ccc" id="16-463976"></td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="17-463976">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="18-463976">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="19-463976">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="20-463976">
+                            </td>
+                            <td style="border:1px solid #ccc" id="21-463976"></td>
+                            <td style="border:1px solid #ccc" id="22-463976"></td>
+                        </tr>
+                        <tr id="trSeparator464240" style="background-color:#ddd">
+                            <td colspan="17" style="border:1px solid #ccc"></td>
+                        </tr>
+                        <tr id="tr464240" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">Solano Kitchen</td>
+                            <td style="border:1px solid #ccc" id="7-464240"></td>
+                            <td style="border:1px solid #ccc" id="8-464240"></td>
+                            <td style="border:1px solid #ccc" id="9-464240"></td>
+                            <td style="border:1px solid #ccc" id="10-464240"></td>
+                            <td style="border:1px solid #ccc" id="11-464240"></td>
+                            <td style="border:1px solid #ccc" id="12-464240"></td>
+                            <td style="border:1px solid #ccc" id="13-464240"></td>
+                            <td style="border:1px solid #ccc" id="14-464240"></td>
+                            <td style="border:1px solid #ccc" id="15-464240"></td>
+                            <td style="border:1px solid #ccc" id="16-464240"></td>
+                            <td style="border:1px solid #ccc" id="17-464240"></td>
+                            <td style="border:1px solid #ccc" id="18-464240"></td>
+                            <td style="border:1px solid #ccc" id="19-464240"></td>
+                            <td style="border:1px solid #ccc" id="20-464240"></td>
+                            <td style="border:1px solid #ccc" id="21-464240"></td>
+                            <td style="border:1px solid #ccc" id="22-464240"></td>
+                        </tr>
+                        <tr id="tr634007" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">Solano Mission Room</td>
+                            <td style="border:1px solid #ccc" id="7-634007"></td>
+                            <td style="border:1px solid #ccc" id="8-634007"></td>
+                            <td style="border:1px solid #ccc" id="9-634007"></td>
+                            <td style="border:1px solid #ccc" id="10-634007"></td>
+                            <td style="border:1px solid #ccc" id="11-634007"></td>
+                            <td style="border:1px solid #ccc" id="12-634007"></td>
+                            <td style="border:1px solid #ccc" id="13-634007"></td>
+                            <td style="border:1px solid #ccc" id="14-634007"></td>
+                            <td style="border:1px solid #ccc" id="15-634007"></td>
+                            <td style="border:1px solid #ccc" id="16-634007"></td>
+                            <td style="border:1px solid #ccc" id="17-634007"></td>
+                            <td style="border:1px solid #ccc" id="18-634007"></td>
+                            <td style="border:1px solid #ccc" id="19-634007"></td>
+                            <td style="border:1px solid #ccc" id="20-634007"></td>
+                            <td style="border:1px solid #ccc" id="21-634007"></td>
+                            <td style="border:1px solid #ccc" id="22-634007"></td>
+                        </tr>
+                        <tr id="tr464241" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">Solano Sanctuary</td>
+                            <td style="border:1px solid #ccc" id="7-464241"></td>
+                            <td style="border:1px solid #ccc" id="8-464241"></td>
+                            <td style="border:1px solid #ccc" id="9-464241"></td>
+                            <td style="border:1px solid #ccc" id="10-464241"></td>
+                            <td style="border:1px solid #ccc" id="11-464241"></td>
+                            <td style="border:1px solid #ccc" id="12-464241"></td>
+                            <td style="border:1px solid #ccc" id="13-464241"></td>
+                            <td style="border:1px solid #ccc" id="14-464241"></td>
+                            <td style="border:1px solid #ccc" id="15-464241"></td>
+                            <td style="border:1px solid #ccc" id="16-464241"></td>
+                            <td style="border:1px solid #ccc" id="17-464241"></td>
+                            <td style="border:1px solid #ccc" id="18-464241"></td>
+                            <td style="border:1px solid #ccc" id="19-464241"></td>
+                            <td style="border:1px solid #ccc" id="20-464241"></td>
+                            <td style="border:1px solid #ccc" id="21-464241"></td>
+                            <td style="border:1px solid #ccc" id="22-464241"></td>
+                        </tr>
+                        <tr id="tr464250" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">Solano Studio</td>
+                            <td style="border:1px solid #ccc" id="7-464250"></td>
+                            <td style="border:1px solid #ccc" id="8-464250"></td>
+                            <td style="border:1px solid #ccc" id="9-464250"></td>
+                            <td style="border:1px solid #ccc" id="10-464250"></td>
+                            <td style="border:1px solid #ccc" id="11-464250"></td>
+                            <td style="border:1px solid #ccc" id="12-464250"></td>
+                            <td style="border:1px solid #ccc" id="13-464250"></td>
+                            <td style="border:1px solid #ccc" id="14-464250"></td>
+                            <td style="border:1px solid #ccc" id="15-464250"></td>
+                            <td style="border:1px solid #ccc" id="16-464250"></td>
+                            <td style="border:1px solid #ccc" id="17-464250"></td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="18-464250">
+                            </td>
+                            <td style="border: 1px solid rgb(204, 204, 204); background-color: pink;" id="19-464250">
+                            </td>
+                            <td style="border:1px solid #ccc" id="20-464250"></td>
+                            <td style="border:1px solid #ccc" id="21-464250"></td>
+                            <td style="border:1px solid #ccc" id="22-464250"></td>
+                        </tr>
+                        <tr id="tr465575" onmouseover="$(this).css('background-color','#e9f2f2')"
+                            onmouseout="$(this).css('background-color','#FFF')">
+                            <td class="fw-bold">Video Studio</td>
+                            <td style="border:1px solid #ccc" id="7-465575"></td>
+                            <td style="border:1px solid #ccc" id="8-465575"></td>
+                            <td style="border:1px solid #ccc" id="9-465575"></td>
+                            <td style="border:1px solid #ccc" id="10-465575"></td>
+                            <td style="border:1px solid #ccc" id="11-465575"></td>
+                            <td style="border:1px solid #ccc" id="12-465575"></td>
+                            <td style="border:1px solid #ccc" id="13-465575"></td>
+                            <td style="border:1px solid #ccc" id="14-465575"></td>
+                            <td style="border:1px solid #ccc" id="15-465575"></td>
+                            <td style="border:1px solid #ccc" id="16-465575"></td>
+                            <td style="border:1px solid #ccc" id="17-465575"></td>
+                            <td style="border:1px solid #ccc" id="18-465575"></td>
+                            <td style="border:1px solid #ccc" id="19-465575"></td>
+                            <td style="border:1px solid #ccc" id="20-465575"></td>
+                            <td style="border:1px solid #ccc" id="21-465575"></td>
+                            <td style="border:1px solid #ccc" id="22-465575"></td>
+                        </tr>
+                    </table>
                 </div>
             </div>
         </div>
 
     </div>
 
+
+
+    <div id="ui-datepicker-div" class="ui-datepicker ui-widget ui-widget-content ui-helper-clearfix ui-corner-all">
+        <div class="ui-datepicker-header ui-widget-header ui-helper-clearfix ui-corner-all"><a
+                class="ui-datepicker-prev ui-corner-all" data-handler="prev" data-event="click" title="Prev"><span
+                    class="ui-icon ui-icon-circle-triangle-w">Prev</span></a><a class="ui-datepicker-next ui-corner-all"
+                data-handler="next" data-event="click" title="Next"><span
+                    class="ui-icon ui-icon-circle-triangle-e">Next</span></a>
+            <div class="ui-datepicker-title"><span class="ui-datepicker-month">January</span>&nbsp;<span
+                    class="ui-datepicker-year">2024</span></div>
+        </div>
+        <table class="ui-datepicker-calendar">
+            <thead>
+                <tr>
+                    <th scope="col" class="ui-datepicker-week-end"><span title="Sunday">Su</span></th>
+                    <th scope="col"><span title="Monday">Mo</span></th>
+                    <th scope="col"><span title="Tuesday">Tu</span></th>
+                    <th scope="col"><span title="Wednesday">We</span></th>
+                    <th scope="col"><span title="Thursday">Th</span></th>
+                    <th scope="col"><span title="Friday">Fr</span></th>
+                    <th scope="col" class="ui-datepicker-week-end"><span title="Saturday">Sa</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td
+                        class=" ui-datepicker-week-end ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">
+                        &nbsp;</td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="1">1</a></td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="2">2</a></td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="3">3</a></td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="4">4</a></td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="5">5</a></td>
+                    <td class=" ui-datepicker-week-end " data-handler="selectDay" data-event="click" data-month="0"
+                        data-year="2024"><a class="ui-state-default" href="#" aria-current="false" data-date="6">6</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class=" ui-datepicker-week-end " data-handler="selectDay" data-event="click" data-month="0"
+                        data-year="2024"><a class="ui-state-default" href="#" aria-current="false" data-date="7">7</a>
+                    </td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="8">8</a></td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="9">9</a></td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="10">10</a></td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="11">11</a></td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="12">12</a></td>
+                    <td class=" ui-datepicker-week-end " data-handler="selectDay" data-event="click" data-month="0"
+                        data-year="2024"><a class="ui-state-default" href="#" aria-current="false" data-date="13">13</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class=" ui-datepicker-week-end " data-handler="selectDay" data-event="click" data-month="0"
+                        data-year="2024"><a class="ui-state-default" href="#" aria-current="false" data-date="14">14</a>
+                    </td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="15">15</a></td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="16">16</a></td>
+                    <td class=" ui-datepicker-days-cell-over  ui-datepicker-current-day ui-datepicker-today"
+                        data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default ui-state-highlight ui-state-active ui-state-hover" href="#"
+                            aria-current="true" data-date="17">17</a></td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="18">18</a></td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="19">19</a></td>
+                    <td class=" ui-datepicker-week-end " data-handler="selectDay" data-event="click" data-month="0"
+                        data-year="2024"><a class="ui-state-default" href="#" aria-current="false" data-date="20">20</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class=" ui-datepicker-week-end " data-handler="selectDay" data-event="click" data-month="0"
+                        data-year="2024"><a class="ui-state-default" href="#" aria-current="false" data-date="21">21</a>
+                    </td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="22">22</a></td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="23">23</a></td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="24">24</a></td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="25">25</a></td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="26">26</a></td>
+                    <td class=" ui-datepicker-week-end " data-handler="selectDay" data-event="click" data-month="0"
+                        data-year="2024"><a class="ui-state-default" href="#" aria-current="false" data-date="27">27</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td class=" ui-datepicker-week-end " data-handler="selectDay" data-event="click" data-month="0"
+                        data-year="2024"><a class="ui-state-default" href="#" aria-current="false" data-date="28">28</a>
+                    </td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="29">29</a></td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="30">30</a></td>
+                    <td class=" " data-handler="selectDay" data-event="click" data-month="0" data-year="2024"><a
+                            class="ui-state-default" href="#" aria-current="false" data-date="31">31</a></td>
+                    <td class=" ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td>
+                    <td class=" ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">&nbsp;</td>
+                    <td
+                        class=" ui-datepicker-week-end ui-datepicker-other-month ui-datepicker-unselectable ui-state-disabled">
+                        &nbsp;</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </body>
 
 </html>
