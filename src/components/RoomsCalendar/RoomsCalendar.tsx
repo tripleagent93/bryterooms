@@ -92,9 +92,23 @@ function RoomsCalendar() {
 									},
 								}}
 							>
-								<TableCell component="th" scope="row">
-									{row}
-								</TableCell>
+								<TableCell scope="row">{row}</TableCell>
+								<TableCell scope="row"></TableCell>
+								<TableCell scope="row"></TableCell>
+								<TableCell scope="row"></TableCell>
+								<TableCell scope="row"></TableCell>
+								<TableCell scope="row"></TableCell>
+								<TableCell scope="row"></TableCell>
+								<TableCell scope="row"></TableCell>
+								<TableCell scope="row"></TableCell>
+								<TableCell scope="row"></TableCell>
+								<TableCell scope="row"></TableCell>
+								<TableCell scope="row"></TableCell>
+								<TableCell scope="row"></TableCell>
+								<TableCell scope="row"></TableCell>
+								<TableCell scope="row"></TableCell>
+								<TableCell scope="row"></TableCell>
+								<TableCell scope="row"></TableCell>
 							</TableRow>
 						))}
 					</TableBody>
