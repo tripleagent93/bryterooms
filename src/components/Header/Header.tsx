@@ -10,7 +10,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
-import logo from '../../bryte-logo.png';
+import logo from '../../bryte-light-logo.png';
 
 const pages = ['Room Availability'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
@@ -36,7 +36,7 @@ function Header() {
 	};
 
 	return (
-		<AppBar position="static" sx={{ backgroundColor: '#f8fafb' }}>
+		<AppBar position="static" sx={{ backgroundColor: '#109fe5' }}>
 			<Container maxWidth="xl">
 				<Toolbar disableGutters>
 					<img
@@ -56,7 +56,7 @@ function Header() {
 							<Button
 								key={page}
 								onClick={handleCloseNavMenu}
-								sx={{ my: 2, color: '#000', display: 'block' }}
+								sx={{ my: 2, color: '#fff', display: 'block' }}
 							>
 								{page}
 							</Button>
