@@ -7,13 +7,27 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function RoomsCalendar() {
 	const [date, setDate] = useState<Dayjs | null>(
 		dayjs(new Date().toLocaleDateString('en-CA'))
 	);
+
+	useEffect(() => {
+		axios
+			.get(
+				'https://api.planningcenteronline.com/oauth/authorize?client_id=4d16b452f211191a3a92d5f8579caef561dfd759148f1f096921c845ec97337d&redirect_uri=https://tripleagent93.github.io&response_type=code&scope=calendar'
+			)
+			.then((response) => {
+				console.log(response);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}, []);
 
 	const columns = [
 		'7AM',
