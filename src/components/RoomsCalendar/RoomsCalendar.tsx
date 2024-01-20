@@ -11,7 +11,9 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useState } from 'react';
 
 function RoomsCalendar() {
-	const [date, setDate] = useState<Dayjs | null>(dayjs(new Date()));
+	const [date, setDate] = useState<Dayjs | null>(
+		dayjs(new Date().toLocaleDateString('en-CA'))
+	);
 
 	const columns = [
 		'7AM',
