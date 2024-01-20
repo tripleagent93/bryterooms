@@ -7,10 +7,11 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs, { Dayjs } from 'dayjs';
 import { useState } from 'react';
 
 function RoomsCalendar() {
-	const [value, setValue] = useState<string | null>('');
+	const [date, setDate] = useState<Dayjs | null>(dayjs(new Date()));
 
 	const columns = [
 		'7AM',
@@ -65,8 +66,8 @@ function RoomsCalendar() {
 							<Box sx={{ py: 2 }}>
 								<DatePicker
 									label="Date"
-									value={value}
-									onChange={(newValue) => setValue(newValue)}
+									value={date}
+									onChange={(newValue) => setDate(newValue)}
 								/>
 							</Box>
 							{columns.map((colName) => {
