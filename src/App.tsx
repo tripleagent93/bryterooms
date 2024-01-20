@@ -1,10 +1,13 @@
 import './App.css';
-import Header from './components/Header';
+import AppLayout from './components/AppLayout';
+import RoomsCalendar from './components/RoomsCalendar';
 
 function App() {
 	return (
 		<div className="App">
-			<Header />
+			<AppLayout>
+				<RoomsCalendar />
+			</AppLayout>
 		</div>
 	);
 }
