@@ -16,6 +16,7 @@ function RoomsCalendar() {
 	);
 
 	// const [code, setCode] = useState<string>('');
+
 	// const code = queryParameters.get('code');
 
 	// console.log('code', code);
