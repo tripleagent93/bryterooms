@@ -9,7 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 function RoomsCalendar() {
 	const [date, setDate] = useState<Dayjs | null>(
@@ -42,7 +42,7 @@ function RoomsCalendar() {
 		}
 	}, [code]);
 
-	useEffect(() => {
+	const getEvents = useCallback(() => {
 		if (accessToken) {
 			axios
 				.get(
@@ -63,6 +63,10 @@ function RoomsCalendar() {
 				});
 		}
 	}, [accessToken, date]);
+
+	useEffect(() => {
+		getEvents();
+	}, []);
 
 	const columns = [
 		'7AM',
@@ -118,7 +122,10 @@ function RoomsCalendar() {
 								<DatePicker
 									label="Date"
 									value={date}
-									onChange={(newValue) => setDate(newValue)}
+									onChange={(newValue) => {
+										setDate(newValue);
+										getEvents();
+									}}
 								/>
 							</Box>
 							{columns.map((colName) => {
