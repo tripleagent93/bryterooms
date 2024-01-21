@@ -66,8 +66,10 @@ function RoomsCalendar() {
 	}, [accessToken, dateFormatted]);
 
 	useEffect(() => {
-		getEvents();
-	}, []);
+		if (date) {
+			getEvents();
+		}
+	}, [date, getEvents]);
 
 	const columns = [
 		'7AM',
@@ -138,7 +140,6 @@ function RoomsCalendar() {
 									value={date}
 									onChange={(newValue) => {
 										setDate(newValue);
-										getEvents();
 									}}
 								/>
 								<Button
