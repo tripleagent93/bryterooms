@@ -7,6 +7,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useState } from 'react';
 
@@ -26,18 +27,20 @@ function RoomsCalendar() {
 
 	console.log('code', code);
 
-	// useEffect(() => {
-	// 	axios
-	// 		.get(
-	// 			'https://api.planningcenteronline.com/oauth/authorize?client_id=4d16b452f211191a3a92d5f8579caef561dfd759148f1f096921c845ec97337d&redirect_uri=https://tripleagent93.github.io&response_type=code&scope=calendar'
-	// 		)
-	// 		.then((response) => {
-	// 			console.log(response);
-	// 		})
-	// 		.catch((error) => {
-	// 			console.error(error);
-	// 		});
-	// }, []);
+	useEffect(() => {
+		if (code) {
+			axios
+				.get(
+					`https://api.planningcenteronline.com/oauth/token?grant_type=authorization_code&code=${code}&client_id=4d16b452f211191a3a92d5f8579caef561dfd759148f1f096921c845ec97337d&client_secret=ea32b02c65e4fb51415063b77168f1c611137b77b5f445f6d85ac2a00834e893&redirect_uri=https://tripleagent93.github.io`
+				)
+				.then((response) => {
+					console.log('token: ', response);
+				})
+				.catch((error) => {
+					console.error(error);
+				});
+		}
+	}, [code]);
 
 	const columns = [
 		'7AM',
