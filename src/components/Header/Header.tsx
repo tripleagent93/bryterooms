@@ -37,8 +37,11 @@ function Header() {
 
 	return (
 		<AppBar position="static" sx={{ backgroundColor: '#109fe5' }}>
-			<Container maxWidth="xl">
-				<Toolbar disableGutters>
+			<Container maxWidth="xl" sx={{ py: '5px' }}>
+				<Toolbar
+					disableGutters
+					sx={{ justifyContent: 'space-between' }}
+				>
 					<img
 						src={logo}
 						alt="bryte logo"
