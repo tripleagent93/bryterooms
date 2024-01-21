@@ -31,7 +31,7 @@ function RoomsCalendar() {
 		if (code) {
 			axios
 				.post(
-					`https://api.planningcenteronline.com/oauth/token?grant_type=authorization_code&code=${code}&client_id=d55d566a307f7b48741b9a6493ebb6dd4ba60ea5b9088be8ce1ccf045ddf671d&client_secret=2dbd5bc7c5e562363daa9510a6dda007b22a47a7755c94c162a17dd3728f9977&redirect_uri=https://tripleagent93.github.io`
+					`https://api.planningcenteronline.com/oauth/token?grant_type=authorization_code&code=${code}&client_id=4d16b452f211191a3a92d5f8579caef561dfd759148f1f096921c845ec97337d&client_secret=ea32b02c65e4fb51415063b77168f1c611137b77b5f445f6d85ac2a00834e893&redirect_uri=https://rusyus2000.github.io`
 				)
 				.then((response) => {
 					console.log('token: ', response);
