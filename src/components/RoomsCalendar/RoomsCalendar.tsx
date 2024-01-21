@@ -30,7 +30,7 @@ function RoomsCalendar() {
 	useEffect(() => {
 		if (code) {
 			axios
-				.get(
+				.post(
 					`https://api.planningcenteronline.com/oauth/token?grant_type=authorization_code&code=${code}&client_id=4d16b452f211191a3a92d5f8579caef561dfd759148f1f096921c845ec97337d&client_secret=ea32b02c65e4fb51415063b77168f1c611137b77b5f445f6d85ac2a00834e893&redirect_uri=https://tripleagent93.github.io`
 				)
 				.then((response) => {
