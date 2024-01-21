@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/static/css/main.32277ca6.css",
-    "main.js": "/static/js/main.dd1b89ea.js",
+    "main.css": "/static/css/main.48b879d8.css",
+    "main.js": "/static/js/main.fab0cd29.js",
     "static/js/787.bdc1ec05.chunk.js": "/static/js/787.bdc1ec05.chunk.js",
     "static/media/bryte-light-logo.png": "/static/media/bryte-light-logo.babcf9733a86402db762.png",
     "index.html": "/index.html",
-    "main.32277ca6.css.map": "/static/css/main.32277ca6.css.map",
-    "main.dd1b89ea.js.map": "/static/js/main.dd1b89ea.js.map",
+    "main.48b879d8.css.map": "/static/css/main.48b879d8.css.map",
+    "main.fab0cd29.js.map": "/static/js/main.fab0cd29.js.map",
     "787.bdc1ec05.chunk.js.map": "/static/js/787.bdc1ec05.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.32277ca6.css",
-    "static/js/main.dd1b89ea.js"
+    "static/css/main.48b879d8.css",
+    "static/js/main.fab0cd29.js"
   ]
 }
