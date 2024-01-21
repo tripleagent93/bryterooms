@@ -8,18 +8,23 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs, { Dayjs } from 'dayjs';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function RoomsCalendar() {
 	const [date, setDate] = useState<Dayjs | null>(
 		dayjs(new Date().toLocaleDateString('en-CA'))
 	);
 
-	// const [code, setCode] = useState<string>('');
+	const [code, setCode] = useState<string | undefined>();
 
-	// const code = queryParameters.get('code');
+	useEffect(() => {
+		const queryParameters = new URLSearchParams(window.location.search);
+		if (queryParameters.has('code')) {
+			setCode(queryParameters.get('code') ?? undefined);
+		}
+	}, []);
 
-	// console.log('code', code);
+	console.log('code', code);
 
 	// useEffect(() => {
 	// 	axios
