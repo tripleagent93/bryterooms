@@ -1,7 +1,6 @@
 import AppBar from '@mui/material/AppBar';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
@@ -12,7 +11,6 @@ import Typography from '@mui/material/Typography';
 import * as React from 'react';
 import logo from '../../bryte-light-logo.png';
 
-const pages = ['Room Availability'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function Header() {
@@ -51,19 +49,13 @@ function Header() {
 					<Box
 						sx={{
 							flexGrow: 1,
-							display: { xs: 'none', md: 'flex' },
-							ml: 4,
+							display: 'flex',
+							justifyContent: 'center',
 						}}
 					>
-						{pages.map((page) => (
-							<Button
-								key={page}
-								onClick={handleCloseNavMenu}
-								sx={{ my: 2, color: '#fff', display: 'block' }}
-							>
-								{page}
-							</Button>
-						))}
+						<Typography textAlign="center">
+							Room Availability
+						</Typography>
 					</Box>
 					<Box sx={{ flexGrow: 0 }}>
 						<Tooltip title="Open settings">
