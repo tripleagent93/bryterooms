@@ -38,6 +38,7 @@ function RoomsCalendar() {
 				.then((response) => {
 					console.log('token: ', response.data.access_token);
 					setAccessToken(response.data.access_token);
+					window.location.replace('https://tripleagent93.github.io/');
 				})
 				.catch((error) => {
 					console.error(error);
