@@ -1,4 +1,6 @@
-import { Box } from '@mui/material';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { Box, Button } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -12,12 +14,13 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useCallback, useEffect, useState } from 'react';
 
 function RoomsCalendar() {
+	const [code, setCode] = useState<string | undefined>();
+	const [accessToken, setAccessToken] = useState<string | undefined>();
 	const [date, setDate] = useState<Dayjs | null>(
 		dayjs(new Date().toLocaleDateString('en-CA'))
 	);
 
-	const [code, setCode] = useState<string | undefined>();
-	const [accessToken, setAccessToken] = useState<string | undefined>();
+	const dateFormatted = date?.toISOString().split('T')[0];
 
 	useEffect(() => {
 		const queryParameters = new URLSearchParams(window.location.search);
@@ -46,9 +49,7 @@ function RoomsCalendar() {
 		if (accessToken) {
 			axios
 				.get(
-					`https://api.planningcenteronline.com/calendar/v2/resource_bookings?where[starts_at]=${
-						date?.toISOString().split('T')[0]
-					}&where[ends_at]=${date?.toISOString().split('T')[0]}`,
+					`https://api.planningcenteronline.com/calendar/v2/resource_bookings?where[starts_at]=${dateFormatted}&where[ends_at]=${dateFormatted}`,
 					{
 						headers: {
 							Authorization: `Bearer ${accessToken}`,
@@ -62,7 +63,7 @@ function RoomsCalendar() {
 					console.error(error);
 				});
 		}
-	}, [accessToken, date]);
+	}, [accessToken, dateFormatted]);
 
 	useEffect(() => {
 		getEvents();
@@ -111,14 +112,27 @@ function RoomsCalendar() {
 		'Solano Studio',
 		'Video Studio',
 	];
-
+	console.log('date', date);
 	return (
 		<>
 			<TableContainer component={Paper} sx={{ maxWidth: 1488 }}>
 				<Table sx={{ minWidth: 650 }} aria-label="simple table">
 					<TableHead sx={{ backgroundColor: '#f3f3f3' }}>
 						<TableRow>
-							<Box sx={{ py: 2 }}>
+							<Box
+								sx={{
+									py: 2,
+									display: 'flex',
+									alignItems: 'center',
+								}}
+							>
+								<Button
+									onClick={() => {
+										setDate(dayjs(date).add(-1, 'day'));
+									}}
+								>
+									<ArrowBackIosIcon />
+								</Button>
 								<DatePicker
 									label="Date"
 									value={date}
@@ -127,6 +141,13 @@ function RoomsCalendar() {
 										getEvents();
 									}}
 								/>
+								<Button
+									onClick={() => {
+										setDate(dayjs(date).add(1, 'day'));
+									}}
+								>
+									<ArrowForwardIosIcon />
+								</Button>
 							</Box>
 							{columns.map((colName) => {
 								return (
