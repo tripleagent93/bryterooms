@@ -48,7 +48,12 @@ function RoomsCalendar() {
 				.get(
 					`https://api.planningcenteronline.com/calendar/v2/resource_bookings?where[starts_at]=${
 						date?.toISOString().split('T')[0]
-					}&where[ends_at]=${date?.toISOString().split('T')[0]}`
+					}&where[ends_at]=${date?.toISOString().split('T')[0]}`,
+					{
+						headers: {
+							Authorization: `Bearer ${accessToken}`,
+						},
+					}
 				)
 				.then((response) => {
 					console.log('response: ', response);
