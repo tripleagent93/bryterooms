@@ -30,16 +30,6 @@ function RoomsCalendar() {
 	}, []);
 
 	useEffect(() => {
-		if (!code && !accessToken) {
-			window.location.replace(
-				'https://api.planningcenteronline.com/oauth/authorize?client_id=4d16b452f211191a3a92d5f8579caef561dfd759148f1f096921c845ec97337d&redirect_uri=https://tripleagent93.github.io&response_type=code&scope=calendar'
-			);
-		} else {
-			window.location.replace('https://tripleagent93.github.io/');
-		}
-	}, [accessToken, code]);
-
-	useEffect(() => {
 		if (code) {
 			axios
 				.post(
