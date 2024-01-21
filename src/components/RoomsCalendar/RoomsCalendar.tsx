@@ -8,7 +8,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs, { Dayjs } from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 function RoomsCalendar() {
 	const [date, setDate] = useState<Dayjs | null>(
@@ -16,7 +16,6 @@ function RoomsCalendar() {
 	);
 
 	// const [code, setCode] = useState<string>('');
-	const queryParameters = new URLSearchParams(window.location.search);
 	// const code = queryParameters.get('code');
 
 	// console.log('code', code);
@@ -33,10 +32,6 @@ function RoomsCalendar() {
 	// 			console.error(error);
 	// 		});
 	// }, []);
-
-	useEffect(() => {
-		console.log('queryParameters', queryParameters);
-	});
 
 	const columns = [
 		'7AM',
