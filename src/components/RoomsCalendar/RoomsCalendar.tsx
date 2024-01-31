@@ -165,6 +165,14 @@ function RoomsCalendar() {
 		'10PM',
 	];
 
+	const renderCell = (roomId: string) => {
+		return events.find((event) => event.roomId === roomId) ? (
+			<TableCell scope="row" sx={{ backgroundColor: 'red' }}></TableCell>
+		) : (
+			<TableCell scope="row"></TableCell>
+		);
+	};
+
 	return (
 		<>
 			<TableContainer component={Paper} sx={{ maxWidth: 1488 }}>
@@ -223,6 +231,10 @@ function RoomsCalendar() {
 								>
 									{room.name}
 								</TableCell>
+								{columns.map((col) => {
+									return renderCell(room.id);
+								})}
+								{/* <TableCell scope="row"></TableCell>
 								<TableCell scope="row"></TableCell>
 								<TableCell scope="row"></TableCell>
 								<TableCell scope="row"></TableCell>
@@ -237,8 +249,7 @@ function RoomsCalendar() {
 								<TableCell scope="row"></TableCell>
 								<TableCell scope="row"></TableCell>
 								<TableCell scope="row"></TableCell>
-								<TableCell scope="row"></TableCell>
-								<TableCell scope="row"></TableCell>
+								<TableCell scope="row"></TableCell> */}
 							</TableRow>
 						))}
 					</TableBody>
