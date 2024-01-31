@@ -111,8 +111,8 @@ function RoomsCalendar() {
 					}
 				)
 				.then((response) => {
-					console.log('response: ', response.data);
-					formatResponse(JSON.parse(response.data));
+					console.log('response: ', response.data.data);
+					formatResponse(response.data.data);
 				})
 				.catch((error) => {
 					console.error(error);
