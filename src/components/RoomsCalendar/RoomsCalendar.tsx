@@ -67,27 +67,7 @@ function RoomsCalendar() {
 		}
 	}, [code]);
 
-	const getEvents = useCallback(() => {
-		if (accessToken) {
-			axios
-				.get(
-					`https://api.planningcenteronline.com/calendar/v2/resource_bookings?where[starts_at]=${dateFormatted}&where[ends_at]=${dateFormatted}`,
-					{
-						headers: {
-							Authorization: `Bearer ${accessToken}`,
-						},
-					}
-				)
-				.then((response) => {
-					console.log('response: ', response);
-				})
-				.catch((error) => {
-					console.error(error);
-				});
-		}
-	}, [accessToken, dateFormatted]);
-
-	const formatResponse = useCallback(() => {
+	const formatResponse = useCallback((resourceBookings: { data: any[] }) => {
 		const events: Event[] = [];
 		resourceBookings.data.forEach((item) => {
 			const startTime = new Date(
@@ -111,6 +91,27 @@ function RoomsCalendar() {
 		setEvents(events);
 	}, []);
 
+	const getEvents = useCallback(() => {
+		if (accessToken) {
+			axios
+				.get(
+					`https://api.planningcenteronline.com/calendar/v2/resource_bookings?where[starts_at]=${dateFormatted}&where[ends_at]=${dateFormatted}`,
+					{
+						headers: {
+							Authorization: `Bearer ${accessToken}`,
+						},
+					}
+				)
+				.then((response) => {
+					console.log('response: ', response);
+					formatResponse(response);
+				})
+				.catch((error) => {
+					console.error(error);
+				});
+		}
+	}, [accessToken, dateFormatted, formatResponse]);
+
 	const initializeRooms = useCallback(() => {
 		const rooms: Room[] = [];
 		roomIdentifiers.data.forEach((item) =>
@@ -127,24 +128,13 @@ function RoomsCalendar() {
 		if (date) {
 			getEvents();
 			initializeRooms();
-			formatResponse();
+			//formatResponse();
 		}
 	}, [date, formatResponse, getEvents, initializeRooms]);
 
 	console.log('resourceBookings', resourceBookings);
 	console.log('rooms', rooms);
 	console.log('events', events);
-
-	// const startTime = new Date(
-	// 	resourceBookings.data[0].attributes.starts_at
-	// ).toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
-
-	// const endTime = new Date(
-	// 	resourceBookings.data[0].attributes.ends_at
-	// ).toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
-
-	// console.log('startTime', startTime);
-	// console.log('endTime', endTime);
 
 	const columns = [
 		'7AM',
@@ -165,9 +155,17 @@ function RoomsCalendar() {
 		'10PM',
 	];
 
-	const renderCell = (roomId: string) => {
-		return events.find((event) => event.roomId === roomId) ? (
-			<TableCell scope="row" sx={{ backgroundColor: 'red' }}></TableCell>
+	const renderCell = (roomId: string, index: number) => {
+		return events.find(
+			(e) =>
+				e.roomId === roomId &&
+				index >= e.startTimeIndex &&
+				index <= e.endTimeIndex
+		) ? (
+			<TableCell
+				scope="row"
+				sx={{ backgroundColor: '#fcefdf' }}
+			></TableCell>
 		) : (
 			<TableCell scope="row"></TableCell>
 		);
@@ -231,25 +229,9 @@ function RoomsCalendar() {
 								>
 									{room.name}
 								</TableCell>
-								{columns.map((col) => {
-									return renderCell(room.id);
+								{columns.map((col, i) => {
+									return renderCell(room.id, i);
 								})}
-								{/* <TableCell scope="row"></TableCell>
-								<TableCell scope="row"></TableCell>
-								<TableCell scope="row"></TableCell>
-								<TableCell scope="row"></TableCell>
-								<TableCell scope="row"></TableCell>
-								<TableCell scope="row"></TableCell>
-								<TableCell scope="row"></TableCell>
-								<TableCell scope="row"></TableCell>
-								<TableCell scope="row"></TableCell>
-								<TableCell scope="row"></TableCell>
-								<TableCell scope="row"></TableCell>
-								<TableCell scope="row"></TableCell>
-								<TableCell scope="row"></TableCell>
-								<TableCell scope="row"></TableCell>
-								<TableCell scope="row"></TableCell>
-								<TableCell scope="row"></TableCell> */}
 							</TableRow>
 						))}
 					</TableBody>
