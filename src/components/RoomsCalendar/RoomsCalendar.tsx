@@ -12,6 +12,25 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useCallback, useEffect, useState } from 'react';
+import { resourceBookings } from '../../utils/mockData';
+import { roomIdentifiers } from '../../utils/roomNumberData';
+
+export interface Event {
+	id: string;
+	startTime: string;
+	startTimeHours: number;
+	startTimeIndex: number;
+	endTime: string;
+	endTimeHours: number;
+	endTimeIndex: number;
+	roomId: string;
+}
+
+export interface Room {
+	id: string;
+	name: string;
+	description: string;
+}
 
 function RoomsCalendar() {
 	const [code, setCode] = useState<string | undefined>();
@@ -19,6 +38,9 @@ function RoomsCalendar() {
 	const [date, setDate] = useState<Dayjs | null>(
 		dayjs(new Date().toLocaleDateString('en-CA'))
 	);
+
+	const [events, setEvents] = useState<Event[]>([]);
+	const [rooms, setRooms] = useState<Room[]>([]);
 
 	const dateFormatted = date?.toISOString().split('T')[0];
 
@@ -65,11 +87,64 @@ function RoomsCalendar() {
 		}
 	}, [accessToken, dateFormatted]);
 
+	const formatResponse = useCallback(() => {
+		const events: Event[] = [];
+		resourceBookings.data.forEach((item) => {
+			const startTime = new Date(
+				item.attributes.starts_at
+			).toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
+			const endTime = new Date(item.attributes.ends_at).toLocaleString(
+				'en-US',
+				{ timeZone: 'America/Los_Angeles' }
+			);
+			events.push({
+				id: item.id,
+				startTime: startTime,
+				startTimeHours: new Date(startTime).getHours(),
+				startTimeIndex: new Date(startTime).getHours() - 7,
+				endTime: endTime,
+				endTimeHours: new Date(endTime).getHours(),
+				endTimeIndex: new Date(endTime).getHours() - 7,
+				roomId: item.relationships.resource.data.id,
+			});
+		});
+		setEvents(events);
+	}, []);
+
+	const initializeRooms = useCallback(() => {
+		const rooms: Room[] = [];
+		roomIdentifiers.data.forEach((item) =>
+			rooms.push({
+				id: item.id,
+				name: item.attributes.name,
+				description: item.attributes.path_name,
+			})
+		);
+		setRooms(rooms);
+	}, []);
+
 	useEffect(() => {
 		if (date) {
 			getEvents();
+			initializeRooms();
+			formatResponse();
 		}
-	}, [date, getEvents]);
+	}, [date, formatResponse, getEvents, initializeRooms]);
+
+	console.log('resourceBookings', resourceBookings);
+	console.log('rooms', rooms);
+	console.log('events', events);
+
+	// const startTime = new Date(
+	// 	resourceBookings.data[0].attributes.starts_at
+	// ).toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
+
+	// const endTime = new Date(
+	// 	resourceBookings.data[0].attributes.ends_at
+	// ).toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });
+
+	// console.log('startTime', startTime);
+	// console.log('endTime', endTime);
 
 	const columns = [
 		'7AM',
@@ -90,31 +165,6 @@ function RoomsCalendar() {
 		'10PM',
 	];
 
-	const rows = [
-		'112 - Kids Room',
-		'103 - Meeting Room',
-		'113 - Kids Room',
-		'115 - Kids Room',
-		'201/203 - Classroom',
-		'202 Youth Room',
-		'204 - Classroom',
-		'205/207 - Classroom',
-		'208 - Classroom',
-		'210 - Classroom',
-		'211 - Classroom',
-		'213/215 - Classroom',
-		'Brothers Room',
-		'Choir Room',
-		'Gym',
-		'Kitchen',
-		'Sanctuary',
-		'Solano Kitchen',
-		'Solano Mission Room',
-		'Solano Sanctuary',
-		'Solano Studio',
-		'Video Studio',
-	];
-	console.log('date', date);
 	return (
 		<>
 			<TableContainer component={Paper} sx={{ maxWidth: 1488 }}>
@@ -165,13 +215,13 @@ function RoomsCalendar() {
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{rows.map((row, index) => (
+						{rooms.map((room, index) => (
 							<TableRow key={index}>
 								<TableCell
 									scope="row"
 									sx={{ fontWeight: 'bold' }}
 								>
-									{row}
+									{room.name}
 								</TableCell>
 								<TableCell scope="row"></TableCell>
 								<TableCell scope="row"></TableCell>
