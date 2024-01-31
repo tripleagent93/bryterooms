@@ -69,7 +69,7 @@ function RoomsCalendar() {
 
 	const formatResponse = useCallback((resources: any) => {
 		const events: Event[] = [];
-		resources.data.forEach(
+		resources.forEach(
 			(item: {
 				attributes: {
 					starts_at: string | number | Date;
@@ -112,7 +112,7 @@ function RoomsCalendar() {
 				)
 				.then((response) => {
 					console.log('response: ', response);
-					formatResponse(response);
+					formatResponse(response.data);
 				})
 				.catch((error) => {
 					console.error(error);
