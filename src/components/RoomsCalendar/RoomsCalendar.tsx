@@ -126,6 +126,7 @@ function RoomsCalendar() {
 									py: 2,
 									display: 'flex',
 									alignItems: 'center',
+									minWidth: 300,
 								}}
 							>
 								<Button
@@ -138,6 +139,7 @@ function RoomsCalendar() {
 								<DatePicker
 									label="Date"
 									value={date}
+									disablePast
 									onChange={(newValue) => {
 										setDate(newValue);
 									}}
@@ -164,15 +166,13 @@ function RoomsCalendar() {
 					</TableHead>
 					<TableBody>
 						{rows.map((row, index) => (
-							<TableRow
-								key={index}
-								sx={{
-									'&:last-child td, &:last-child th': {
-										border: 0,
-									},
-								}}
-							>
-								<TableCell scope="row">{row}</TableCell>
+							<TableRow key={index}>
+								<TableCell
+									scope="row"
+									sx={{ fontWeight: 'bold' }}
+								>
+									{row}
+								</TableCell>
 								<TableCell scope="row"></TableCell>
 								<TableCell scope="row"></TableCell>
 								<TableCell scope="row"></TableCell>
