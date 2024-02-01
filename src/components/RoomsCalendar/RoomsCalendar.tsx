@@ -363,7 +363,7 @@ function RoomsCalendar() {
 					</>
 				) : (
 					<Typography variant="body1" fontWeight={'bold'}>
-						Booked Time Slots
+						{selectedRoomId ? 'Booked Time Slots' : ''}
 					</Typography>
 				)}
 
