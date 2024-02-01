@@ -161,6 +161,7 @@ function RoomsCalendar() {
 
 	const handleDateChange = (date: Dayjs | null) => {
 		setDate(date);
+		setSelectedRoomId('');
 		getEvents();
 	};
 
