@@ -153,7 +153,7 @@ function RoomsCalendar() {
 			initializeRooms();
 			//formatResponse();
 		}
-	}, [date, formatResponse, getEvents, initializeRooms]);
+	}, [date, getEvents, initializeRooms]);
 
 	//console.log('resourceBookings', resourceBookings);
 	// console.log('rooms', rooms);
