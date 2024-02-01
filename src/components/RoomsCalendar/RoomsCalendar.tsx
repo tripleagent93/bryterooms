@@ -81,8 +81,6 @@ function RoomsCalendar() {
 
 	const formatResponse = useCallback(
 		(resources: any) => {
-			console.log('in formatResponse()');
-			setEvents([]);
 			const newEvents = events;
 			resources.forEach(
 				(item: {
@@ -215,6 +213,7 @@ function RoomsCalendar() {
 			<Button
 				onClick={() => {
 					setDate(dayjs(date).add(-1, 'day'));
+					setEvents([]);
 				}}
 			>
 				<ArrowBackIosIcon />
@@ -225,11 +224,13 @@ function RoomsCalendar() {
 				disablePast
 				onChange={(newValue) => {
 					setDate(newValue);
+					setEvents([]);
 				}}
 			/>
 			<Button
 				onClick={() => {
 					setDate(dayjs(date).add(1, 'day'));
+					setEvents([]);
 				}}
 			>
 				<ArrowForwardIosIcon />
