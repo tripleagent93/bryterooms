@@ -157,10 +157,9 @@ function RoomsCalendar() {
 		}
 	}, [date, formatResponse, getEvents, initializeRooms]);
 
-	console.log('resourceBookings', resourceBookings);
-	console.log('rooms', rooms);
-	console.log('events', events);
-	console.log('selectedRoom', selectedRoomId);
+	//console.log('resourceBookings', resourceBookings);
+	// console.log('rooms', rooms);
+	// console.log('events', events);
 
 	const columns = [
 		'7AM',
@@ -191,9 +190,10 @@ function RoomsCalendar() {
 			<TableCell
 				scope="row"
 				sx={{ backgroundColor: '#fcefdf' }}
+				key={index}
 			></TableCell>
 		) : (
-			<TableCell scope="row"></TableCell>
+			<TableCell scope="row" key={index}></TableCell>
 		);
 	};
 
@@ -242,11 +242,12 @@ function RoomsCalendar() {
 					<TableHead sx={{ backgroundColor: '#f3f3f3' }}>
 						<TableRow>
 							{mainDatePicker}
-							{columns.map((colName) => {
+							{columns.map((colName, index) => {
 								return (
 									<TableCell
 										align="right"
 										sx={{ fontWeight: 'bold' }}
+										key={index}
 									>
 										{colName}
 									</TableCell>
@@ -260,6 +261,7 @@ function RoomsCalendar() {
 								<TableCell
 									scope="row"
 									sx={{ fontWeight: 'bold' }}
+									key={index}
 								>
 									{room.name}
 								</TableCell>
@@ -295,16 +297,19 @@ function RoomsCalendar() {
 						}}
 						label="Room #"
 					>
-						{rooms.map((room) =>
+						{rooms.map((room, index) =>
 							room.numEvents ? (
 								<MenuItem
 									value={room.id}
+									key={index}
 									sx={{ color: 'orange' }}
 								>{`${room.name} - ${room.numEvents} Event${
 									room.numEvents > 1 ? 's' : ''
 								}`}</MenuItem>
 							) : (
-								<MenuItem value={room.id}>{room.name}</MenuItem>
+								<MenuItem key={index} value={room.id}>
+									{room.name}
+								</MenuItem>
 							)
 						)}
 					</Select>
@@ -317,9 +322,9 @@ function RoomsCalendar() {
 					display: { xs: 'block', md: 'none', lg: 'none' },
 				}}
 			>
-				{events.map((e) =>
+				{events.map((e, index) =>
 					e.roomId === selectedRoomId ? (
-						<Grid item xs={12} mb={3}>
+						<Grid item xs={12} mb={3} key={`event_${index}`}>
 							<Typography variant="h5" component="div">
 								Booked Time Slots
 							</Typography>
