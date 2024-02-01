@@ -79,44 +79,42 @@ function RoomsCalendar() {
 		}
 	}, [code]);
 
-	const formatResponse = useCallback(
-		(resources: any) => {
-			const newEvents = events;
-			resources.forEach(
-				(item: {
-					attributes: {
-						starts_at: string | number | Date;
-						ends_at: string | number | Date;
-					};
-					id: any;
-					relationships: { resource: { data: { id: any } } };
-				}) => {
-					const startTime = new Date(
-						item.attributes.starts_at
-					).toLocaleString('en-US', {
-						timeZone: 'America/Los_Angeles',
-					});
-					const endTime = new Date(
-						item.attributes.ends_at
-					).toLocaleString('en-US', {
-						timeZone: 'America/Los_Angeles',
-					});
-					newEvents.push({
-						id: item.id,
-						startTime: startTime,
-						startTimeHours: new Date(startTime).getHours(),
-						startTimeIndex: new Date(startTime).getHours() - 7,
-						endTime: endTime,
-						endTimeHours: new Date(endTime).getHours(),
-						endTimeIndex: new Date(endTime).getHours() - 7,
-						roomId: item.relationships.resource.data.id,
-					});
-				}
-			);
-			setEvents(newEvents);
-		},
-		[events]
-	);
+	const formatResponse = useCallback((resources: any) => {
+		console.log('formatResponse');
+		const newEvents: Event[] = [];
+		resources.forEach(
+			(item: {
+				attributes: {
+					starts_at: string | number | Date;
+					ends_at: string | number | Date;
+				};
+				id: any;
+				relationships: { resource: { data: { id: any } } };
+			}) => {
+				const startTime = new Date(
+					item.attributes.starts_at
+				).toLocaleString('en-US', {
+					timeZone: 'America/Los_Angeles',
+				});
+				const endTime = new Date(
+					item.attributes.ends_at
+				).toLocaleString('en-US', {
+					timeZone: 'America/Los_Angeles',
+				});
+				newEvents.push({
+					id: item.id,
+					startTime: startTime,
+					startTimeHours: new Date(startTime).getHours(),
+					startTimeIndex: new Date(startTime).getHours() - 7,
+					endTime: endTime,
+					endTimeHours: new Date(endTime).getHours(),
+					endTimeIndex: new Date(endTime).getHours() - 7,
+					roomId: item.relationships.resource.data.id,
+				});
+			}
+		);
+		setEvents(newEvents);
+	}, []);
 
 	const getEvents = useCallback(() => {
 		if (accessToken) {
@@ -213,7 +211,6 @@ function RoomsCalendar() {
 			<Button
 				onClick={() => {
 					setDate(dayjs(date).add(-1, 'day'));
-					setEvents([]);
 				}}
 			>
 				<ArrowBackIosIcon />
@@ -224,13 +221,11 @@ function RoomsCalendar() {
 				disablePast
 				onChange={(newValue) => {
 					setDate(newValue);
-					setEvents([]);
 				}}
 			/>
 			<Button
 				onClick={() => {
 					setDate(dayjs(date).add(1, 'day'));
-					setEvents([]);
 				}}
 			>
 				<ArrowForwardIosIcon />
