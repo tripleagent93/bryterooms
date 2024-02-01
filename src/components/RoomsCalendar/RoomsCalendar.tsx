@@ -352,7 +352,6 @@ function RoomsCalendar() {
 				sx={{
 					justifyContent: 'center',
 					display: { xs: 'block', md: 'none', lg: 'none' },
-					height: '100vh',
 				}}
 			>
 				{rooms.find((room) => room.id === selectedRoomId)?.numEvents ===
