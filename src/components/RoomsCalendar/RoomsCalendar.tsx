@@ -24,6 +24,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useCallback, useEffect, useState } from 'react';
+import { resourceBookings } from '../../utils/mockData';
 import { roomIdentifiers } from '../../utils/roomNumberData';
 
 export interface Event {
@@ -35,6 +36,7 @@ export interface Event {
 	endTimeHours: number;
 	endTimeIndex: number;
 	roomId: string;
+	timeDesc: string;
 }
 
 export interface Room {
@@ -110,6 +112,17 @@ function RoomsCalendar() {
 					endTimeHours: new Date(endTime).getHours(),
 					endTimeIndex: new Date(endTime).getHours() - 7,
 					roomId: item.relationships.resource.data.id,
+					timeDesc: `${new Date(
+						item.attributes.starts_at
+					).toLocaleTimeString(navigator.language, {
+						hour: '2-digit',
+						minute: '2-digit',
+					})} - ${new Date(
+						item.attributes.ends_at
+					).toLocaleTimeString(navigator.language, {
+						hour: '2-digit',
+						minute: '2-digit',
+					})}`,
 				});
 			}
 		);
@@ -134,6 +147,8 @@ function RoomsCalendar() {
 				.catch((error) => {
 					console.error(error);
 				});
+		} else {
+			formatResponse(resourceBookings.data);
 		}
 	}, [accessToken, dateFormatted, formatResponse]);
 
@@ -288,46 +303,54 @@ function RoomsCalendar() {
 					display: { xs: 'block', md: 'none', lg: 'none' },
 				}}
 			>
-				<Typography variant="h5" sx={{ mt: 3, mb: 1 }}>
+				<Typography variant="h5" sx={{ mb: 1 }}>
 					{date?.format('MMMM DD, YYYY')}
 				</Typography>
-				{mainDatePicker}
-				<FormControl sx={{ m: 1, minWidth: 180 }}>
-					<InputLabel id="demo-simple-select-autowidth-label">
-						Room #
-					</InputLabel>
-					<Select
-						labelId="demo-simple-select-autowidth-label"
-						id="demo-simple-select-autowidth"
-						value={selectedRoomId}
-						onChange={(event: SelectChangeEvent) => {
-							setSelectedRoomId(event.target.value);
-						}}
-						label="Room #"
-					>
-						{rooms.map((room, index) =>
-							room.numEvents ? (
-								<MenuItem
-									value={room.id}
-									key={index}
-									sx={{ color: 'orange' }}
-								>{`${room.name} - ${room.numEvents} Event${
-									room.numEvents > 1 ? 's' : ''
-								}`}</MenuItem>
-							) : (
-								<MenuItem key={index} value={room.id}>
-									{room.name}
-								</MenuItem>
-							)
-						)}
-					</Select>
-				</FormControl>
+				<Card variant="outlined">
+					<CardContent>
+						{mainDatePicker}
+						<FormControl sx={{ m: 1, minWidth: 180 }}>
+							<InputLabel id="demo-simple-select-autowidth-label">
+								Room #
+							</InputLabel>
+							<Select
+								labelId="demo-simple-select-autowidth-label"
+								id="demo-simple-select-autowidth"
+								value={selectedRoomId}
+								onChange={(event: SelectChangeEvent) => {
+									setSelectedRoomId(event.target.value);
+								}}
+								label="Room #"
+							>
+								{rooms.map((room, index) =>
+									room.numEvents ? (
+										<MenuItem
+											value={room.id}
+											key={index}
+											sx={{ color: 'orange' }}
+										>{`${room.name} - ${
+											room.numEvents
+										} Event${
+											room.numEvents > 1 ? 's' : ''
+										}`}</MenuItem>
+									) : (
+										<MenuItem key={index} value={room.id}>
+											{room.name}
+										</MenuItem>
+									)
+								)}
+							</Select>
+						</FormControl>
+					</CardContent>
+				</Card>
 			</Grid>
 			<Grid
 				container
+				mt={2}
 				sx={{
 					justifyContent: 'center',
 					display: { xs: 'block', md: 'none', lg: 'none' },
+					height: '100vh',
 				}}
 			>
 				{events.map((e, index) =>
@@ -339,7 +362,7 @@ function RoomsCalendar() {
 							<Card variant="outlined">
 								<CardContent>
 									<Typography variant="h5" component="div">
-										{`${e.startTime} - ${e.endTime}`}
+										{e.timeDesc}
 									</Typography>
 								</CardContent>
 							</Card>
@@ -350,9 +373,7 @@ function RoomsCalendar() {
 				)}
 				{rooms.find((room) => room.id === selectedRoomId)?.numEvents ===
 				0 ? (
-					<Typography variant="body1" mt={2}>
-						No Events
-					</Typography>
+					<Typography variant="body1">No Events</Typography>
 				) : (
 					''
 				)}
