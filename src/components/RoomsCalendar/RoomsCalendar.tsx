@@ -1,6 +1,18 @@
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import { Box, Button } from '@mui/material';
+import {
+	Box,
+	Button,
+	Card,
+	CardContent,
+	FormControl,
+	Grid,
+	InputLabel,
+	MenuItem,
+	Select,
+	SelectChangeEvent,
+	Typography,
+} from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -30,6 +42,7 @@ export interface Room {
 	id: string;
 	name: string;
 	description: string;
+	numEvents: number;
 }
 
 function RoomsCalendar() {
@@ -43,7 +56,7 @@ function RoomsCalendar() {
 	const [rooms, setRooms] = useState<Room[]>([]);
 
 	const dateFormatted = date?.toISOString().split('T')[0];
-
+	const [selectedRoomId, setSelectedRoomId] = useState('');
 	useEffect(() => {
 		const queryParameters = new URLSearchParams(window.location.search);
 		if (queryParameters.has('code')) {
@@ -117,6 +130,8 @@ function RoomsCalendar() {
 				.catch((error) => {
 					console.error(error);
 				});
+		} else {
+			formatResponse(resourceBookings.data);
 		}
 	}, [accessToken, dateFormatted, formatResponse]);
 
@@ -127,10 +142,12 @@ function RoomsCalendar() {
 				id: item.id,
 				name: item.attributes.name,
 				description: item.attributes.path_name,
+				numEvents: events.filter((obj) => obj.roomId === item.id)
+					.length,
 			})
 		);
 		setRooms(rooms);
-	}, []);
+	}, [events]);
 
 	useEffect(() => {
 		if (date) {
@@ -143,6 +160,7 @@ function RoomsCalendar() {
 	console.log('resourceBookings', resourceBookings);
 	console.log('rooms', rooms);
 	console.log('events', events);
+	console.log('selectedRoom', selectedRoomId);
 
 	const columns = [
 		'7AM',
@@ -179,43 +197,51 @@ function RoomsCalendar() {
 		);
 	};
 
+	const mainDatePicker = (
+		<Box
+			sx={{
+				py: 2,
+				display: 'flex',
+				alignItems: 'center',
+				justifyContent: 'center',
+				minWidth: 300,
+			}}
+		>
+			<Button
+				onClick={() => {
+					setDate(dayjs(date).add(-1, 'day'));
+				}}
+			>
+				<ArrowBackIosIcon />
+			</Button>
+			<DatePicker
+				label="Date"
+				value={date}
+				disablePast
+				onChange={(newValue) => {
+					setDate(newValue);
+				}}
+			/>
+			<Button
+				onClick={() => {
+					setDate(dayjs(date).add(1, 'day'));
+				}}
+			>
+				<ArrowForwardIosIcon />
+			</Button>
+		</Box>
+	);
+
 	return (
 		<>
-			<TableContainer component={Paper} sx={{ maxWidth: 1488 }}>
+			<TableContainer
+				component={Paper}
+				sx={{ maxWidth: 1488, display: { xs: 'none', md: 'block' } }}
+			>
 				<Table sx={{ minWidth: 650 }} aria-label="simple table">
 					<TableHead sx={{ backgroundColor: '#f3f3f3' }}>
 						<TableRow>
-							<Box
-								sx={{
-									py: 2,
-									display: 'flex',
-									alignItems: 'center',
-									minWidth: 300,
-								}}
-							>
-								<Button
-									onClick={() => {
-										setDate(dayjs(date).add(-1, 'day'));
-									}}
-								>
-									<ArrowBackIosIcon />
-								</Button>
-								<DatePicker
-									label="Date"
-									value={date}
-									disablePast
-									onChange={(newValue) => {
-										setDate(newValue);
-									}}
-								/>
-								<Button
-									onClick={() => {
-										setDate(dayjs(date).add(1, 'day'));
-									}}
-								>
-									<ArrowForwardIosIcon />
-								</Button>
-							</Box>
+							{mainDatePicker}
 							{columns.map((colName) => {
 								return (
 									<TableCell
@@ -245,6 +271,79 @@ function RoomsCalendar() {
 					</TableBody>
 				</Table>
 			</TableContainer>
+			<Grid
+				container
+				sx={{
+					justifyContent: 'center',
+					display: { xs: 'block', md: 'none', lg: 'none' },
+				}}
+			>
+				<Typography variant="h5" sx={{ mt: 3, mb: 1 }}>
+					{date?.format('MMMM DD, YYYY')}
+				</Typography>
+				{mainDatePicker}
+				<FormControl sx={{ m: 1, minWidth: 180 }}>
+					<InputLabel id="demo-simple-select-autowidth-label">
+						Room #
+					</InputLabel>
+					<Select
+						labelId="demo-simple-select-autowidth-label"
+						id="demo-simple-select-autowidth"
+						value={selectedRoomId}
+						onChange={(event: SelectChangeEvent) => {
+							setSelectedRoomId(event.target.value);
+						}}
+						label="Room #"
+					>
+						{rooms.map((room) =>
+							room.numEvents ? (
+								<MenuItem
+									value={room.id}
+									sx={{ color: 'orange' }}
+								>{`${room.name} - ${room.numEvents} Event${
+									room.numEvents > 1 ? 's' : ''
+								}`}</MenuItem>
+							) : (
+								<MenuItem value={room.id}>{room.name}</MenuItem>
+							)
+						)}
+					</Select>
+				</FormControl>
+			</Grid>
+			<Grid
+				container
+				sx={{
+					justifyContent: 'center',
+					display: { xs: 'block', md: 'none', lg: 'none' },
+				}}
+			>
+				{events.map((e) =>
+					e.roomId === selectedRoomId ? (
+						<Grid item xs={12} mb={3}>
+							<Typography variant="h5" component="div">
+								Booked Time Slots
+							</Typography>
+							<Card variant="outlined">
+								<CardContent>
+									<Typography variant="h5" component="div">
+										{`${e.startTime} - ${e.endTime}`}
+									</Typography>
+								</CardContent>
+							</Card>
+						</Grid>
+					) : (
+						<></>
+					)
+				)}
+				{rooms.find((room) => room.id === selectedRoomId)?.numEvents ===
+				0 ? (
+					<Typography variant="body1" mt={2}>
+						No Events
+					</Typography>
+				) : (
+					''
+				)}
+			</Grid>
 		</>
 	);
 }
