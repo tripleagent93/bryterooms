@@ -129,7 +129,41 @@ function RoomsCalendar() {
 				)
 				.then((response) => {
 					console.log('response: ', response.data.data);
-					formatResponse(response.data.data);
+					//formatResponse(response.data.data);
+					const newEvents: Event[] = [];
+					response.data.data.forEach(
+						(item: {
+							attributes: {
+								starts_at: string | number | Date;
+								ends_at: string | number | Date;
+							};
+							id: any;
+							relationships: { resource: { data: { id: any } } };
+						}) => {
+							const startTime = new Date(
+								item.attributes.starts_at
+							).toLocaleString('en-US', {
+								timeZone: 'America/Los_Angeles',
+							});
+							const endTime = new Date(
+								item.attributes.ends_at
+							).toLocaleString('en-US', {
+								timeZone: 'America/Los_Angeles',
+							});
+							newEvents.push({
+								id: item.id,
+								startTime: startTime,
+								startTimeHours: new Date(startTime).getHours(),
+								startTimeIndex:
+									new Date(startTime).getHours() - 7,
+								endTime: endTime,
+								endTimeHours: new Date(endTime).getHours(),
+								endTimeIndex: new Date(endTime).getHours() - 7,
+								roomId: item.relationships.resource.data.id,
+							});
+						}
+					);
+					setEvents(newEvents);
 				})
 				.catch((error) => {
 					console.error(error);
