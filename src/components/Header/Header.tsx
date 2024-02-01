@@ -34,7 +34,10 @@ function Header() {
 	};
 
 	return (
-		<AppBar position="static" sx={{ backgroundColor: '#109fe5' }}>
+		<AppBar
+			position="static"
+			sx={{ backgroundColor: '#109fe5', boxShadow: 'none' }}
+		>
 			<Container maxWidth="xl" sx={{ py: '5px' }}>
 				<Toolbar
 					disableGutters
