@@ -157,7 +157,7 @@ function RoomsCalendar() {
 
 	useEffect(() => {
 		getEvents();
-	}, []);
+	}, [getEvents]);
 
 	const handleDateChange = (date: Dayjs | null) => {
 		setDate(date);
