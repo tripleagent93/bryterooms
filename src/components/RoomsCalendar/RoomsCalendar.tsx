@@ -169,7 +169,7 @@ function RoomsCalendar() {
 					console.error(error);
 				});
 		}
-	}, [accessToken, dateFormatted, formatResponse]);
+	}, [accessToken, dateFormatted]);
 
 	const initializeRooms = useCallback(() => {
 		const rooms: Room[] = [];
