@@ -24,7 +24,6 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import axios from 'axios';
 import dayjs, { Dayjs } from 'dayjs';
 import { useCallback, useEffect, useState } from 'react';
-import { resourceBookings } from '../../utils/mockData';
 import { roomIdentifiers } from '../../utils/roomNumberData';
 
 export interface Event {
@@ -81,6 +80,7 @@ function RoomsCalendar() {
 	}, [code]);
 
 	const formatResponse = useCallback((resources: any) => {
+		console.log('in formatResponse()');
 		const events: Event[] = [];
 		resources.forEach(
 			(item: {
@@ -130,8 +130,6 @@ function RoomsCalendar() {
 				.catch((error) => {
 					console.error(error);
 				});
-		} else {
-			formatResponse(resourceBookings.data);
 		}
 	}, [accessToken, dateFormatted, formatResponse]);
 
