@@ -132,6 +132,7 @@ function RoomsCalendar() {
 				)
 				.then((response) => {
 					console.log('response: ', response.data.data);
+					setEvents([]);
 					formatResponse(response.data.data);
 				})
 				.catch((error) => {
@@ -158,13 +159,12 @@ function RoomsCalendar() {
 		if (date) {
 			getEvents();
 			initializeRooms();
-			//formatResponse();
 		}
 	}, [date, getEvents, initializeRooms]);
 
 	//console.log('resourceBookings', resourceBookings);
-	// console.log('rooms', rooms);
-	// console.log('events', events);
+	console.log('rooms', rooms);
+	console.log('events', events);
 
 	const columns = [
 		'7AM',
