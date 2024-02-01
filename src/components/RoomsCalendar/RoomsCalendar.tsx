@@ -1,5 +1,6 @@
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import LockIcon from '@mui/icons-material/Lock';
 import {
 	Box,
 	Button,
@@ -354,16 +355,34 @@ function RoomsCalendar() {
 					height: '100vh',
 				}}
 			>
+				{rooms.find((room) => room.id === selectedRoomId)?.numEvents ===
+				0 ? (
+					<>
+						<Typography variant="body1" fontWeight={'bold'}>
+							No Events
+						</Typography>
+					</>
+				) : (
+					<Typography variant="body1" fontWeight={'bold'}>
+						Booked Time Slots
+					</Typography>
+				)}
+
 				{events.map((e, index) =>
 					e.roomId === selectedRoomId ? (
-						<Grid item xs={12} mb={3} key={`event_${index}`}>
-							<Typography variant="h5" component="div">
-								Booked Time Slots
-							</Typography>
+						<Grid item xs={12} mb={3} mt={1} key={`event_${index}`}>
 							<Card variant="outlined">
 								<CardContent>
-									<Typography variant="h5" component="div">
-										{e.timeDesc}
+									<Typography
+										variant="body1"
+										color={'grey'}
+										sx={{
+											display: 'flex',
+											alignItems: 'center',
+											justifyContent: 'center',
+										}}
+									>
+										{e.timeDesc} <LockIcon sx={{ pl: 1 }} />
 									</Typography>
 								</CardContent>
 							</Card>
@@ -372,12 +391,8 @@ function RoomsCalendar() {
 						<></>
 					)
 				)}
-				{rooms.find((room) => room.id === selectedRoomId)?.numEvents ===
-				0 ? (
+				{selectedRoomId && (
 					<>
-						<Typography variant="body1" fontWeight={'bold'}>
-							No Events
-						</Typography>
 						<Typography variant="body2" mt={2}>
 							Available Time Slots
 						</Typography>
@@ -388,7 +403,11 @@ function RoomsCalendar() {
 										<Chip
 											label={timeSlot}
 											variant="outlined"
-											sx={{ width: '100%' }}
+											color="primary"
+											sx={{
+												width: '100%',
+												backgroundColor: 'white',
+											}}
 										/>
 									</Grid>
 								);
@@ -403,8 +422,6 @@ function RoomsCalendar() {
 							Reserve Room
 						</Button>
 					</>
-				) : (
-					''
 				)}
 			</Grid>
 		</>
