@@ -5,6 +5,7 @@ import {
 	Button,
 	Card,
 	CardContent,
+	Chip,
 	FormControl,
 	Grid,
 	InputLabel,
@@ -373,7 +374,35 @@ function RoomsCalendar() {
 				)}
 				{rooms.find((room) => room.id === selectedRoomId)?.numEvents ===
 				0 ? (
-					<Typography variant="body1">No Events</Typography>
+					<>
+						<Typography variant="body1" fontWeight={'bold'}>
+							No Events
+						</Typography>
+						<Typography variant="body2" mt={2}>
+							Available Time Slots
+						</Typography>
+						<Grid container spacing={1} mt={2}>
+							{columns.map((timeSlot) => {
+								return (
+									<Grid item xs={3}>
+										<Chip
+											label={timeSlot}
+											variant="outlined"
+											sx={{ width: '100%' }}
+										/>
+									</Grid>
+								);
+							})}
+						</Grid>
+						<Button
+							variant="contained"
+							fullWidth
+							onClick={() => {}}
+							sx={{ mt: 4 }}
+						>
+							Reserve Room
+						</Button>
+					</>
 				) : (
 					''
 				)}
