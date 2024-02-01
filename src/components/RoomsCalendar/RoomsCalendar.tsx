@@ -125,13 +125,13 @@ function RoomsCalendar() {
 				)
 				.then((response) => {
 					console.log('response: ', response.data.data);
-					formatResponse(response.data.data);
+					//formatResponse(response.data.data);
 				})
 				.catch((error) => {
 					console.error(error);
 				});
 		}
-	}, [accessToken, dateFormatted, formatResponse]);
+	}, [accessToken, dateFormatted]);
 
 	const initializeRooms = useCallback(() => {
 		const rooms: Room[] = [];
