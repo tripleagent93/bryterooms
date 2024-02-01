@@ -117,7 +117,6 @@ function RoomsCalendar() {
 	}, []);
 
 	const getEvents = useCallback(() => {
-		console.log('getEvents');
 		if (accessToken) {
 			axios
 				.get(
@@ -155,6 +154,10 @@ function RoomsCalendar() {
 	useEffect(() => {
 		initializeRooms();
 	}, [initializeRooms]);
+
+	useEffect(() => {
+		getEvents();
+	}, []);
 
 	const handleDateChange = (date: Dayjs | null) => {
 		setDate(date);
