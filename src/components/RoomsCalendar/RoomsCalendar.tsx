@@ -214,7 +214,7 @@ function RoomsCalendar() {
 		) ? (
 			<TableCell
 				scope="row"
-				sx={{ backgroundColor: '#fcefdf' }}
+				sx={{ backgroundColor: '#fcefdf', border: 'none !important' }}
 				key={index}
 			></TableCell>
 		) : (
